@@ -104,6 +104,9 @@ func applyTags(f *field, tags map[string]string) {
 	if v, ok := tags["class"]; ok {
 		f.Class = v
 	}
+	if v, ok := tags["readonly"]; ok {
+		f.ReadOnly = v == "true"
+	}
 }
 
 func parseTags(tags string) map[string]string {
@@ -135,6 +138,7 @@ type field struct {
 	Placeholder string
 	Type        string
 	ID          string
+	ReadOnly    bool
 	Value       interface{}
 	Footer      template.HTML
 	Class       string
