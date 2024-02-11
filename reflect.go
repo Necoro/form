@@ -16,12 +16,12 @@ func valueOf(v interface{}) reflect.Value {
 	rv := reflect.ValueOf(v)
 	// If a nil pointer is passed in but has a type we can recover, but I
 	// really should just panic and tell people to fix their shitty code.
-	if rv.Type().Kind() == reflect.Ptr && rv.IsNil() {
+	if rv.Type().Kind() == reflect.Pointer && rv.IsNil() {
 		rv = reflect.New(rv.Type().Elem()).Elem()
 	}
 	// If we have a pointer or interface let's try to get the underlying
 	// element
-	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+	for rv.Kind() == reflect.Pointer || rv.Kind() == reflect.Interface {
 		rv = rv.Elem()
 	}
 	return rv
@@ -43,7 +43,7 @@ func fields(v interface{}, names ...string) []field {
 		// This could probably be done in a simpler way given that we
 		// typically recur with this value, but this works so I'm letting it
 		// be.
-		if t.Field(i).Type.Kind() == reflect.Ptr && rf.IsNil() {
+		if t.Field(i).Type.Kind() == reflect.Pointer && rf.IsNil() {
 			rf = reflect.New(t.Field(i).Type.Elem()).Elem()
 		}
 
