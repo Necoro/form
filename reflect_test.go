@@ -19,6 +19,9 @@ func Test_fields(t *testing.T) {
 	type addressWithTags struct {
 		Street1 string `form:"name=street"`
 	}
+	type Address struct {
+		City string
+	}
 
 	tests := []struct {
 		name string
@@ -123,6 +126,29 @@ func Test_fields(t *testing.T) {
 				},
 			},
 		}, {
+			name: "nested anonymous",
+			arg: struct {
+				Name string
+				Address
+			}{},
+			want: []field{
+				{
+					Name:        "Name",
+					Label:       "Name",
+					Placeholder: "Name",
+					Type:        "text",
+					Value:       "",
+					ReadOnly:    false,
+				}, {
+					Name:        "City",
+					Label:       "City",
+					Placeholder: "City",
+					Type:        "text",
+					Value:       "",
+					ReadOnly:    false,
+				},
+			},
+		}, {
 			name: "nested with values",
 			arg: struct {
 				Name    string
@@ -209,6 +235,26 @@ func Test_fields(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "unexported fields",
+			arg: struct {
+				Name string
+				data string
+			}{
+				Name: "Michael Scott",
+				data: "foobar",
+			},
+			want: []field{
+				{
+					Name:        "Name",
+					Label:       "Name",
+					Placeholder: "Name",
+					Type:        "text",
+					Value:       "Michael Scott",
+				},
+			},
+		},
+
 		{
 			name: "custom css class",
 			arg: struct {

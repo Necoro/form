@@ -17,7 +17,7 @@ func valueOf(v interface{}) reflect.Value {
 	// If a nil pointer is passed in but has a type we can recover, but I
 	// really should just panic and tell people to fix their shitty code.
 	if rv.Type().Kind() == reflect.Pointer && rv.IsNil() {
-		rv = reflect.New(rv.Type().Elem()).Elem()
+		rv = reflect.Zero(rv.Type().Elem())
 	}
 	// If we have a pointer or interface let's try to get the underlying
 	// element
@@ -36,23 +36,29 @@ func fields(v interface{}, names ...string) []field {
 	}
 
 	t := rv.Type()
-	ret := make([]field, 0, t.NumField())
-	for i := 0; i < t.NumField(); i++ {
-		rf := rv.Field(i)
+	vFields := reflect.VisibleFields(t)
+	ret := make([]field, 0, len(vFields))
+	for _, tf := range vFields {
+		if !tf.IsExported() {
+			continue
+		}
+
+		rf := rv.FieldByIndex(tf.Index)
 		// If this is a nil pointer, create a new instance of the element.
-		// This could probably be done in a simpler way given that we
-		// typically recur with this value, but this works so I'm letting it
-		// be.
-		if t.Field(i).Type.Kind() == reflect.Pointer && rf.IsNil() {
-			rf = reflect.New(t.Field(i).Type.Elem()).Elem()
+		if tf.Type.Kind() == reflect.Pointer && rf.IsNil() {
+			rf = reflect.Zero(tf.Type.Elem())
 		}
 
 		// If this is a struct it has nested fields we need to add. The
 		// simplest way to do this is to recursively call `fields` but
 		// to provide the name of this struct field to be added as a prefix
 		// to the fields.
-		if rf.Kind() == reflect.Struct {
-			ret = append(ret, fields(rf.Interface(), append(names, t.Field(i).Name)...)...)
+		// This does not apply to anonymous structs, because their fields are
+		// seen as "inlined".
+		if reflect.Indirect(rf).Kind() == reflect.Struct {
+			if !tf.Anonymous {
+				ret = append(ret, fields(rf.Interface(), append(names, tf.Name)...)...)
+			}
 			continue
 		}
 
@@ -60,25 +66,25 @@ func fields(v interface{}, names ...string) []field {
 		// struct and need to add the field. First we check to see if the
 		// ignore tag is present, then we set default values, then finally
 		// we overwrite defaults with any provided tags.
-		tags := parseTags(t.Field(i).Tag.Get("form"))
-		if _, ok := tags["-"]; ok {
+		tags, ignored := parseTags(tf.Tag.Get("form"))
+		if ignored {
 			continue
 		}
-		name := append(names, t.Field(i).Name)
+		name := append(names, tf.Name)
 		f := field{
 			Name:        strings.Join(name, "."),
-			Label:       t.Field(i).Name,
-			Placeholder: t.Field(i).Name,
+			Label:       tf.Name,
+			Placeholder: tf.Name,
 			Type:        "text",
-			Value:       rv.Field(i).Interface(),
+			Value:       rf.Interface(),
 		}
-		applyTags(&f, tags)
+		f.applyTags(tags)
 		ret = append(ret, f)
 	}
 	return ret
 }
 
-func applyTags(f *field, tags map[string]string) {
+func (f *field) applyTags(tags map[string]string) {
 	if v, ok := tags["name"]; ok {
 		f.Name = v
 	}
@@ -109,10 +115,10 @@ func applyTags(f *field, tags map[string]string) {
 	}
 }
 
-func parseTags(tags string) map[string]string {
+func parseTags(tags string) (map[string]string, bool) {
 	tags = strings.TrimSpace(tags)
 	if len(tags) == 0 {
-		return map[string]string{}
+		return map[string]string{}, false
 	}
 	split := strings.Split(tags, ";")
 	ret := make(map[string]string, len(split))
@@ -120,16 +126,14 @@ func parseTags(tags string) map[string]string {
 		kv := strings.Split(tag, "=")
 		if len(kv) < 2 {
 			if kv[0] == "-" {
-				return map[string]string{
-					"-": "this field is ignored",
-				}
+				return nil, true
 			}
 			continue
 		}
 		k, v := strings.TrimSpace(kv[0]), strings.TrimSpace(kv[1])
 		ret[k] = v
 	}
-	return ret
+	return ret, false
 }
 
 type field struct {
