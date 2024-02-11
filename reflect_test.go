@@ -2,8 +2,9 @@ package form
 
 import (
 	"html/template"
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // fields is where like 99% of the real work gets done, so most of the
@@ -248,8 +249,8 @@ func Test_fields(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			got := fields(tc.arg)
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("fields(%+v) = %+v, want %+v", tc.arg, got, tc.want)
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Error(diff)
 			}
 		})
 	}
