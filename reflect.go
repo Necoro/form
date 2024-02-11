@@ -110,8 +110,8 @@ func (f *field) applyTags(tags map[string]string) {
 	if v, ok := tags["class"]; ok {
 		f.Class = v
 	}
-	if v, ok := tags["readonly"]; ok {
-		f.ReadOnly = v == "true"
+	if v, ok := tags["options"]; ok {
+		f.Options = strings.Split(v, ",")
 	}
 }
 
@@ -142,7 +142,7 @@ type field struct {
 	Placeholder string
 	Type        string
 	ID          string
-	ReadOnly    bool
+	Options     []string
 	Value       interface{}
 	Footer      template.HTML
 	Class       string

@@ -40,7 +40,6 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -55,7 +54,6 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "Michael Scott",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -71,7 +69,6 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -84,7 +81,6 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Street1",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -97,7 +93,6 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Street1",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -115,14 +110,12 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				}, {
 					Name:        "Address.Street1",
 					Label:       "Street1",
 					Placeholder: "Street1",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -138,14 +131,12 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				}, {
 					Name:        "City",
 					Label:       "City",
 					Placeholder: "City",
 					Type:        "text",
 					Value:       "",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -164,14 +155,12 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "Michael Scott",
-					ReadOnly:    false,
 				}, {
 					Name:        "Address.Street1",
 					Label:       "Street1",
 					Placeholder: "Street1",
 					Type:        "text",
 					Value:       "123 Test St",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -192,7 +181,6 @@ func Test_fields(t *testing.T) {
 					Type:        "text",
 					Value:       "Michael Scott",
 					ID:          "name",
-					ReadOnly:    false,
 				}, {
 					Name:        "Password",
 					Label:       "Password",
@@ -200,14 +188,12 @@ func Test_fields(t *testing.T) {
 					Type:        "password",
 					Value:       "",
 					Footer:      template.HTML("Something super secret!"),
-					ReadOnly:    false,
 				}, {
 					Name:        "street",
 					Label:       "Street1",
 					Placeholder: "Street1",
 					Type:        "text",
 					Value:       "123 Test St",
-					ReadOnly:    false,
 				},
 			},
 		}, {
@@ -270,13 +256,12 @@ func Test_fields(t *testing.T) {
 					Type:        "text",
 					Value:       "Michael Scott",
 					Class:       "custom-css-class",
-					ReadOnly:    false,
 				},
 			},
 		}, {
 			name: "read only field",
 			arg: struct {
-				Name string `form:"readonly=true"`
+				Name string `form:"options=readonly"`
 			}{
 				Name: "Michael Scott",
 			},
@@ -287,7 +272,24 @@ func Test_fields(t *testing.T) {
 					Placeholder: "Name",
 					Type:        "text",
 					Value:       "Michael Scott",
-					ReadOnly:    true,
+					Options:     []string{"readonly"},
+				},
+			},
+		}, {
+			name: "multiple options",
+			arg: struct {
+				Name string `form:"options=readonly,required"`
+			}{
+				Name: "Michael Scott",
+			},
+			want: []field{
+				{
+					Name:        "Name",
+					Label:       "Name",
+					Placeholder: "Name",
+					Type:        "text",
+					Value:       "Michael Scott",
+					Options:     []string{"readonly", "required"},
 				},
 			},
 		},
