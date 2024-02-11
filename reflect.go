@@ -102,7 +102,7 @@ func applyTags(f *field, tags map[string]string) {
 		f.Footer = template.HTML(v)
 	}
 	if v, ok := tags["class"]; ok {
-		f.Class = template.HTMLEscapeString(v)
+		f.Class = v
 	}
 }
 
