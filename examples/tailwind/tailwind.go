@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/schema"
-	"github.com/joncalhoun/form"
+	"github.com/Necoro/form"
 )
 
 var inputTpl = `

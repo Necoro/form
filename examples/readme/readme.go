@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/joncalhoun/form"
+	"github.com/Necoro/form"
 )
 
 var inputTpl = `
